@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: mi_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: midb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - mi_red
+
+  jakarta:
+    build:
+      context: ./jakarta-postgres-app
+    container_name: mi_jakarta
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/midb
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    networks:
+      - mi_red
+
+  angular:
+    build:
+      context: ./demo66
+    container_name: mi_angular
+    ports:
+      - "4200:80"
+    depends_on:
+      - jakarta
+    networks:
+      - mi_red
+
+volumes:
+  pgdata:
+
+networks:
+  mi_red:
